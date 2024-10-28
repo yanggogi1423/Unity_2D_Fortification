@@ -18,7 +18,8 @@ public class Monster : MonoBehaviour
     public UnityEvent onAttack = new UnityEvent();
     
     [SerializeField] private float moveSpeed = 5f;
-    
+    [SerializeField] private float damage;
+    [SerializeField] private int level;
     
     private void Start()
     {
@@ -29,6 +30,9 @@ public class Monster : MonoBehaviour
 
         finalVector = finalTarget.transform.position - transform.position;
         FindPath();
+
+        //  기본적으로 레벨은 1
+        level = 1;
     }
     
     private void Update()
@@ -47,6 +51,17 @@ public class Monster : MonoBehaviour
         {
             transform.position += curVector.normalized * moveSpeed;
         }
+        else
+        {   //  임시로 작성해놓음
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        GameManager.GetInstance().RemoveMonsters(this);
+        Debug.Log("Touch!");
+        Destroy(gameObject);
     }
 
     private void FindPath()
@@ -100,5 +115,21 @@ public class Monster : MonoBehaviour
     private void Attack()
     {
         
+    }
+
+    public void SetLevel(int i)
+    {
+        level = i;
+        //  TODO : 이후에 레벨을 통한 공격력 및 방어력 공식 만들어야 한다.
+    }
+
+    public void SetPath(GameObject[] os)
+    {
+        pathTags = os;
+    }
+
+    public void SetFinalTarget(GameObject o)
+    {
+        finalTarget = o;
     }
 }
