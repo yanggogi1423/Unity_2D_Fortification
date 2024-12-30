@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -6,8 +7,12 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
+/*
+ * 이동 관련 메소드 포함
+ */
 public class Monster : MonoBehaviour
 {
+    [Header("Targets")]
     public GameObject target;
     public Vector3 curVector;
     public GameObject[] pathTags;
@@ -15,13 +20,30 @@ public class Monster : MonoBehaviour
     public GameObject finalTarget;
     public Vector3 finalVector;
     
+    [Header("Events")]
     public UnityEvent onAttack = new UnityEvent();
     
+    [Header("Properties")]
+    [SerializeField] private int maxHp;
+    [SerializeField] private int curHp;
     [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float damage;
     [SerializeField] private int level;
+
+    [Header("Animation")]
+    public Animator animator;
+    public bool isLeft;
+    public bool isSide;
+    public bool isUp;
+    public bool isAttack;
+    public bool isDead;
+
+    [Header("Attack")] 
+    protected Coroutine attackCoroutine;
+    [SerializeField] protected int damage;
+    [SerializeField] protected float attackCool;
+    [SerializeField] protected float attackRange;
     
-    private void Start()
+    protected virtual void Start()
     {
         if (pathTags.Length == 0)
         {
@@ -33,34 +55,86 @@ public class Monster : MonoBehaviour
 
         //  기본적으로 레벨은 1
         level = 1;
+
+        //  애니메이터
+        animator = GetComponent<Animator>();
+
+        isLeft = false;
+        isSide = false;
+        isUp = false;
+        isAttack = false;
+        isDead = false;
     }
-    
+
     private void Update()
     {
-        if (CalDist(target.transform) < 0.01)
+        CheckDirection();
+        if (!isDead)
         {
-            FindPath();
+            if (!isAttack)
+            {
+                if (CalDist(target.transform) < 0.01)
+                {
+                    FindPath();
+                }
+                Move();
+            }
+
+            if (curHp <= 0)
+            {
+                Die();
+            }
         }
-        
-        Move();
     }
 
     private void Move()
     {
-        if (Vector3.Distance(transform.position, finalTarget.transform.position) > 0.3)
+        //  공격 중이지 않을 때만 이동
+        if (!isAttack)
         {
             transform.position += curVector.normalized * moveSpeed;
         }
-        else
-        {   //  임시로 작성해놓음
-            Die();
-        }
     }
 
+    private void CheckDirection()
+    {
+        float angle = Mathf.Atan2(curVector.y, curVector.x) * Mathf.Rad2Deg;
+
+        //  -180 ~ 180 범위의 각도를 0 ~ 360도로 변환
+        if (angle < 0) angle += 360f;
+
+        //  각도에 따라 상하좌우 방향 판별
+        isUp = angle > 315 || angle <= 45;              
+        isLeft = angle > 225 && angle <= 315;           
+        isSide = (angle > 45 && angle <= 135) ||
+                 (angle > 225 && angle <= 330);
+
+        if (isLeft)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        
+        animator.SetBool("isSide",isSide);
+        animator.SetBool("isUp",isUp);
+    }
+    
     private void Die()
     {
-        GameManager.GetInstance().RemoveMonsters(this);
-        Debug.Log("Touch!");
+        isDead = true;
+        isAttack = false;
+        StartCoroutine(DieCoroutine());
+    }
+
+    private IEnumerator DieCoroutine()
+    {
+        animator.SetBool("isDead", true);
+        
+        yield return new WaitForSeconds(1.1f);
+        GameManager.Instance.RemoveMonsters(this);
         Destroy(gameObject);
     }
 
@@ -68,6 +142,12 @@ public class Monster : MonoBehaviour
     {
         //  final Vector 업데이트
         finalVector = finalTarget.transform.position - transform.position;
+
+        if (target == finalTarget)
+        {
+            SetVector();
+            return;
+        }
 
         float minDist = CalDist(finalTarget.transform);
         int idx = -1;
@@ -107,14 +187,9 @@ public class Monster : MonoBehaviour
         curVector = target.transform.position - transform.position;
     }
 
-    private float CalDist(Transform t)
+    protected float CalDist(Transform t)
     {
         return Vector3.Distance(t.position, transform.position);
-    }
-
-    private void Attack()
-    {
-        
     }
 
     public void SetLevel(int i)
@@ -132,4 +207,10 @@ public class Monster : MonoBehaviour
     {
         finalTarget = o;
     }
+    
+    protected virtual void Attack()
+    {
+        // 기본 공격 로직
+    }
+    
 }

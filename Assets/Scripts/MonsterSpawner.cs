@@ -15,6 +15,16 @@ public class MonsterSpawner : MonoBehaviour
 
     private void Awake()
     {
+        if (pathTags.Length == 0)
+        {
+            pathTags = GameObject.FindGameObjectsWithTag("path");
+        }
+
+        if (finalTarget == null)
+        {
+            finalTarget = GameObject.FindGameObjectWithTag("final tag");
+        }
+        
         StartCoroutine(MonsterSpawnCoroutine());
     }
 
@@ -28,7 +38,7 @@ public class MonsterSpawner : MonoBehaviour
             mob.SetPath(pathTags);
             mob.SetFinalTarget(finalTarget);
             
-            GameManager.GetInstance().AddMonsters(mob);
+            GameManager.Instance.AddMonsters(mob);
             
             yield return new WaitForSeconds(spawnRate);
         }
