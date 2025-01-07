@@ -65,13 +65,21 @@ public class Archer : MonoBehaviour
 
     private void CheckPreDetection()
     {
-        if (curTarget != null) return;
-        
-        //  가장 먼저 찾는 애를 먼저 공격
-        foreach (var e in enemyList)
+        if (curTarget != null)
         {
+            if (CalDist(curTarget.gameObject.transform) > preAtkRange) ResetTarget();
+            return;
+        }
+        
+
+        // IEnumerator를 사용한 반복문
+        var enumerator = enemyList.GetEnumerator();
+        while (enumerator.MoveNext())
+        {
+            var e = enumerator.Current;
             if (e == null) continue;
-            if (CalDist(e.transform) < preAtkRange && e.GetComponent<Monster>().isTargeted < 2)
+
+            if (CalDist(e.transform) < preAtkRange && e.GetComponent<Monster>().isTargeted < 5)
             {
                 curTarget = e;
                 isPreAtk = true;
@@ -82,6 +90,7 @@ public class Archer : MonoBehaviour
             }
         }
     }
+
 
     private void CheckDetection()
     {

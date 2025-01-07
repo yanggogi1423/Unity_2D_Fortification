@@ -78,12 +78,12 @@ public class Tower : MonoBehaviour
         }
     }
 
-    public void Upgrade()
+    public bool Upgrade()
     {
         if (level >= maxLevel)
         {
             Debug.Log("Max Level");
-            return;
+            return false;
         }
         
         if (towerType == 0)
@@ -97,14 +97,16 @@ public class Tower : MonoBehaviour
                 pop++;
                 
                 //  원래 pop을 돌려놓는다 (nexus)
-                if (pop > 0)
+                if (pop > 1)
                 {
-                    nexus.RechargePop(popList0[pop - 1]);
+                    nexus.RechargePop(popList0[pop - 2]);
                 }
             
                 animator.SetInteger("level", level);
 
                 StartCoroutine(UpgradeCoroutine());
+
+                return true;
             }
         }
         else if (towerType == 1)
@@ -118,16 +120,20 @@ public class Tower : MonoBehaviour
                 pop++;
                 
                 //  원래 pop을 돌려놓는다 (nexus)
-                if (pop > 0)
+                if (pop > 1)
                 {
-                    nexus.RechargePop(popList0[pop - 1]);
+                    nexus.RechargePop(popList0[pop - 2]);
                 }
             
                 animator.SetInteger("level", level);
 
                 StartCoroutine(UpgradeCoroutine());
+                
+                return true;
             }
         }
+
+        return false;
     }
 
     private IEnumerator UpgradeCoroutine()

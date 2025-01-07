@@ -14,19 +14,31 @@ public class MonsterSpawner : MonoBehaviour
     [SerializeField] private float spawnRate;
     [SerializeField] private int phase;
 
+    private Coroutine monsterCoroutine;
+
     private void Awake()
     {
-        if (pathTags.Length == 0)
-        {
-            pathTags = GameObject.FindGameObjectsWithTag("path");
-        }
+        //  무조건 찾도록 변경
+        pathTags = GameObject.FindGameObjectsWithTag("path");
 
         if (finalTarget == null)
         {
             finalTarget = GameObject.FindGameObjectWithTag("final tag");
         }
+        
+        StartSpawnMonster();
+    }
 
-        StartCoroutine(MonsterSpawnCoroutine());
+    public void StartSpawnMonster()
+    {
+        monsterCoroutine = StartCoroutine(MonsterSpawnCoroutine());
+    }
+
+    public void StopSpawnMonster()
+    {
+        if (monsterCoroutine == null) return;
+        StopCoroutine(monsterCoroutine);
+        monsterCoroutine = null;
     }
 
     private IEnumerator MonsterSpawnCoroutine()
@@ -43,8 +55,6 @@ public class MonsterSpawner : MonoBehaviour
 
             mob.SetPath(pathTags);
             mob.SetFinalTarget(finalTarget);
-
-            GameManager.Instance.AddMonsters(mob);
 
             yield return new WaitForSeconds(spawnRate);
         }

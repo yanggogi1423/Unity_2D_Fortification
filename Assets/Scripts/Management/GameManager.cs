@@ -2,19 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : Singleton<GameManager>
 {
-    [SerializeField] private List<Monster> monsters = new();
+    [Header("Main")] 
+    public Button startButton;
 
-    public void AddMonsters(Monster m)
+    public Button exitButton;
+    
+    
+    
+    private void Start()
     {
-        monsters.Add(m);
-    }
-
-    public void RemoveMonsters(Monster m)
-    {
-        monsters.Remove(m);
+        AudioManager.Instance.PlayBGM(AudioManager.Bgm.Main, true);
+        
     }
 
 }

@@ -139,7 +139,7 @@ MonoBehaviour:
       m_Calls: []
   maxHp: 70
   curHp: 70
-  moveSpeed: 0.035
+  moveSpeed: 0.027
   level: 0
   isFly: 0
   animator: {fileID: 0}

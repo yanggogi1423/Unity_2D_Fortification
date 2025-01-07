@@ -119,9 +119,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7eaf91cb0a5ab574dbcf401487edcc9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  preAtkRange: 15
-  atkRange: 18
-  damage: 5
+  preAtkRange: 18
+  atkRange: 15
   attackCool: 4
   isPreAtk: 0
   isAtk: 0

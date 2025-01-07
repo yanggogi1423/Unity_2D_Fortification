@@ -53,7 +53,7 @@ public class MageBullet : MonoBehaviour
     {
         if (target.GetComponent<Monster>().isDead || target == null)
         {
-            Destroy(gameObject);
+            StartCoroutine(DestroyCoroutine());
         }
     }
 

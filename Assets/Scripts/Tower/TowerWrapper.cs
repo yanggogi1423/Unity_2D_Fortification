@@ -43,6 +43,11 @@ public class TowerWrapper : MonoBehaviour
 
     public void SetSelect(bool select)
     {
+        // if (!select)
+        // {
+        //     ClickCancelButton();
+        // }
+        
         towerCanvas.SetActive(select);
 
         if (!isBuilt)
@@ -144,6 +149,7 @@ public class TowerWrapper : MonoBehaviour
         //  Collider, SR 복원
         // circleCollider2D.enabled = true;
         spriteRenderer.enabled = true;
+        upgradeButton.GetComponent<Button>().interactable = true;
 
         isBuilt = false;
         sellButton.SetActive(false);
@@ -171,15 +177,40 @@ public class TowerWrapper : MonoBehaviour
 
     public void Upgrade()
     {
-        StartCoroutine(UpgradeCoroutine());
         if (curSelected == 0)
         {
-            archerTower.GetComponent<Tower>().Upgrade();
+            if (archerTower.GetComponent<Tower>().Upgrade())
+            {
+                StartCoroutine(UpgradeCoroutine());
+            }
         }
         else if (curSelected == 1)
         {
-            mageTower.GetComponent<Tower>().Upgrade();
+            if (mageTower.GetComponent<Tower>().Upgrade())
+            {
+                StartCoroutine(UpgradeCoroutine());
+            }
         }
+    }
+
+    private bool CheckMaxLevel()
+    {
+        if (curSelected == 0)
+        {
+            if (archerTower.GetComponent<Tower>().level > archerTower.GetComponent<Tower>().maxLevel)
+            {
+                return false;
+            }
+        }
+        else if (curSelected == 1)
+        {
+            if (mageTower.GetComponent<Tower>().level > mageTower.GetComponent<Tower>().maxLevel)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private IEnumerator UpgradeCoroutine()
@@ -193,7 +224,11 @@ public class TowerWrapper : MonoBehaviour
             if (elapsed >= 100)
             {
                 upgradeImage.fillAmount = 1f;
-                upgradeButton.GetComponent<Button>().interactable = true;
+                if (CheckMaxLevel())
+                {
+                    upgradeButton.GetComponent<Button>().interactable = true;    
+                }
+                
                 yield break;
             }
             elapsed++;

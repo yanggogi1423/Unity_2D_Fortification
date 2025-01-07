@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class NexusInfo : MonoBehaviour
@@ -19,6 +20,9 @@ public class NexusInfo : MonoBehaviour
     public GameObject healthBarPrefab;
     public Image healthProgress;
     private Transform healthBarTransform;
+    
+    //  UI
+    public UIPlayerHp uiHp;
 
     [Header("Health Bar Settings")] [Tooltip("체력바의 Y 위치 오프셋을 설정")]
     [SerializeField] private float healthBarYOffset = 5f;
@@ -59,6 +63,14 @@ public class NexusInfo : MonoBehaviour
         {
             Debug.LogError("HealthBar Error");
         }
+
+        if (uiHp == null)
+        {
+            Debug.LogError("UI 연결 안 됨");
+        }
+        
+        //  UI Init
+        uiHp.SetUIPlayerHp(curHp,maxHp);
         
         //  For Debug
         GeneralManager.Instance.inGameManager.UiUpdate();
@@ -68,6 +80,8 @@ public class NexusInfo : MonoBehaviour
     {
         curHp -= d;
         Debug.Log("공격받고 있습니다.");
+        
+        uiHp.SetUIPlayerHp(curHp,maxHp);
         
         if (healthProgress != null)
         {
@@ -106,10 +120,14 @@ public class NexusInfo : MonoBehaviour
 
     public bool UseMoneyAndPop(int m, int p)
     {
-        if (curMoney - m < 0 || curPop + p > maxPop)
+        if (curMoney - m < 0)
         {
-            Debug.Log("돈이나 인구수가 부족합니다.");
-
+            GeneralManager.Instance.alertManager.ShowAlert(0);
+            return false;
+        }
+        if (curPop + p > maxPop)
+        {
+            GeneralManager.Instance.alertManager.ShowAlert(1);
             return false;
         }
         

@@ -243,7 +243,6 @@ public class Monster : MonoBehaviour
         animator.SetBool("isDead", true);
         
         yield return new WaitForSeconds(1.1f);
-        GameManager.Instance.RemoveMonsters(this);
         Destroy(gameObject);
     }
 
@@ -251,35 +250,40 @@ public class Monster : MonoBehaviour
     {
         if (isFinal)
         {
+            // 넥서스가 목표인 경우 현재 방향 설정
             curVector = finalTarget.transform.position - transform.position;
             return;
         }
-        
-        //  final Vector 업데이트
-        finalVector = finalTarget.transform.position - transform.position;
 
-        float minDist = CalDist(finalTarget.transform);
-        int idx = -1;
+        // 넥서스 방향 벡터 계산 (Vector2로 변환)
+        Vector2 finalVector2D = (finalTarget.transform.position - transform.position);
+
+        float bestScore = float.MinValue; // 최적화 점수 (각도와 거리의 조합)
+        int idx = -1; // 최적 태그 인덱스 초기화
 
         for (int i = 0; i < pathTags.Length; i++)
         {
-            if (Vector3.Dot((pathTags[i].transform.position - transform.position).normalized, finalVector.normalized) >
-                0f)
+            // 현재 태그의 방향 벡터 계산 (Vector2로 변환)
+            Vector2 directionToTag2D = (pathTags[i].transform.position - transform.position);
+
+            // 진행 방향과 태그 방향의 Dot 계산
+            float dot = Vector2.Dot(directionToTag2D.normalized, finalVector2D.normalized);
+
+            // 태그와의 거리 계산
+            float distanceToTag = CalDist(pathTags[i].transform);
+
+            // 진행 방향과 거리를 기반으로 점수 계산
+            float score = dot * 10f - distanceToTag; // 가중치 조정 가능
+
+            // 조건에 따라 최적 태그 선택
+            if (dot > 0.5f && score > bestScore && (target == null || target != pathTags[i]))
             {
-                if (target == null)
-                {
-                    minDist = CalDist(pathTags[i].transform);
-                    idx = i;
-                }
-                else if (minDist > CalDist(pathTags[i].transform) && target != pathTags[i])
-                {
-                    minDist = CalDist(pathTags[i].transform);
-                    idx = i;
-                }
+                bestScore = score;
+                idx = i;
             }
         }
 
-        //  만일 target이 정해지지 않았다면 무조건 final일 수 밖에 없음
+        // idx가 없으면 finalTarget(넥서스)으로 설정
         if (idx == -1)
         {
             target = finalTarget;
@@ -289,19 +293,23 @@ public class Monster : MonoBehaviour
         {
             target = pathTags[idx];
         }
+
+        // 벡터 업데이트
         SetVector();
     }
 
-
     private void SetVector()
     {
+        // 2D 환경에서도 Vector3를 유지해 방향 벡터를 설정
         curVector = target.transform.position - transform.position;
     }
 
     protected float CalDist(Transform t)
     {
+        // 2D 거리 계산 (Vector2를 사용)
         return Vector2.Distance(t.position, transform.position);
     }
+
 
     public void SetLevel(int i)
     {

@@ -11,6 +11,8 @@ public class InGameManager : MonoBehaviour
 
     [Header("Tower")] public Tower[] towers;
 
+    [Header("Spawner")] public MonsterSpawner[] spawners;
+
     [Header("Enemies")] public List<GameObject> enemies = new List<GameObject>();
 
     [Header("Map")] public Tilemap map;
@@ -18,7 +20,7 @@ public class InGameManager : MonoBehaviour
     [Header("UI Elements")] public TMP_Text goldText;
     public TMP_Text popText;
     
-    void Awake()
+    private void Awake()
     {
         //  스테이지 정보 Set
         StageInfoManager.StageInfoSet();
@@ -33,25 +35,36 @@ public class InGameManager : MonoBehaviour
         if (map == null) map = GameObject.Find("ground").GetComponent<Tilemap>();
     }
 
+    private void Start()
+    {
+        AudioManager.Instance.PlayBGM(AudioManager.Bgm.Stage, true);
+    }
+
+    public void StartWave()
+    {
+        foreach (var s in spawners)
+        {
+            s.StartSpawnMonster();
+        }
+    }
+
+    public void StopWave()
+    {
+        foreach (var s in spawners)
+        {
+            s.StopSpawnMonster();
+        }
+    }
+
     public void GameOver()
     {
         Debug.Log("Game Over");
     }
 
-    private void FixedUpdate()
-    {
-        
-    }
-
-    private void CheckTowerClick()
-    {
-        
-    }
-
     //  For Debug
     public void UiUpdate()
     {
-        goldText.SetText("Gold : " + nexus.curMoney);
-        popText.SetText("Pop : " + nexus.curPop + " / " + nexus.maxPop);
+        goldText.SetText("" + nexus.curMoney);
+        popText.SetText(nexus.curPop + " / " + nexus.maxPop);
     }
 }

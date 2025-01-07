@@ -102,7 +102,7 @@ MonoBehaviour:
   nexus: {fileID: 0}
   minerals: {fileID: 0}
   target: {fileID: 0}
-  gold: 10
+  gold: 5
   pop: 2
   animator: {fileID: 0}
   isLeft: 0
